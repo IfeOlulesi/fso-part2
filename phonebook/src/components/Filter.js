@@ -3,7 +3,7 @@ import React from 'react'
 const Filter = (props) => {
   return (
     <div>
-      Filter shown with:
+      {props.preText}
       <input 
         onChange = {props.onChange}
         placeholder = {props.placeholder}

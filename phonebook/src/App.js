@@ -1,81 +1,70 @@
 import React, { useState, useEffect } from "react" 
 import axios from 'axios'
-
 import Filter from './components/Filter'
-import Form from './components/Form'
-import Numbers from './components/Numbers'
+import Output from './components/Output'
 
 const App = () => {
-  const [newName, setNewName] = useState("") 
-  const [newNumber, setNewNumber] = useState("")
   const [filterParam, setFilterParam] = useState("")
-  const [persons, setPersons] = useState([])
+  const [countries, setCountries] = useState([])
 
+  // get data from API
   useEffect(() => {
-    console.log("Effect")
     axios
-      .get("http://localhost:3001/persons")
-      .then(response => {
-        console.log("promise fulfilled")
-        setPersons(response.data)
-      })
+      .get("https://restcountries.eu/rest/v2/all")
+      .then(response => {setCountries(response.data)})
   }, [])
 
-  const handleSubmit = (event) => {
-    event.preventDefault() 
-    const personObject = {
-      name: newName,
-      number: newNumber
-    } 
-
-    JSON.stringify(persons).includes(JSON.stringify(personObject))
-      ? alert(`${personObject.name} is already added to the phone book`)
-      : setPersons(persons.concat(personObject)) 
-
-    setNewName("") 
-    setNewNumber("")
-  } 
-
-  const newNameHandler = (event) => {
-    setNewName(event.target.value) 
-  } 
-
-  const newNumHandler = (event) => {
-    setNewNumber(event.target.value) 
-  } 
-
+  // defines functionality for the search box
   const filterHandler = (event) => {
     setFilterParam(event.target.value)
+
   }
 
-  const filterOutput = persons.filter(
+  // filters the countries according to the search query,
+  // assigns the result to constant variable filterOutput - 
+  // which is then displayed within the Output component
+  const filterOutput = countries.filter(
     person => JSON
-      .stringify(person)
+      .stringify(person.name)
       .toLowerCase()
-      .includes(filterParam.toLowerCase())
+      .includes(filterParam.toLowerCase().trim())
     )
+
+  console.log(`Search query: ${filterParam}`)
+  console.log(`Length of Countries (Before filter): ${countries.length}`)
+  console.log(`Length of countries (After filter): ${filterOutput.length}`)
+  console.log(`Filtered Countries: ${filterOutput.map(country => country.name)}` )
 
   return (
     <div>
-      <h2>Phonebook</h2>
-
+      <h2>Data for countries</h2>
       <Filter 
+        preText="Find country: "
         placeholder="query..." 
         value={filterParam} 
         onChange={filterHandler} 
       />
 
-      <Form 
-        handleSubmit = {handleSubmit}
-        newName = {newName}
-        newNameHandler = {newNameHandler}
-        newNumber = {newNumber}
-        newNumHandler = {newNumHandler}
-      />
-
-      <Numbers 
-        filterOutput = {filterOutput}
-      />
+      { 
+        filterParam.length === 0
+        ? "Input a search query"
+        : filterOutput.length < 1 
+          ? "No matches found, try another query"
+          : filterOutput.length === 1
+            ? <Output 
+                filterOutput = {filterOutput}
+                sectionTitle = {"Countries"} 
+                single = {true}
+              /> 
+            : filterOutput.length < 11
+              ? <Output 
+                  filterOutput = {filterOutput}
+                  sectionTitle = {"Countries"} 
+                  single = {false}
+                /> 
+              : "Too many matches found, please try a more specific query"
+      }
+      
 
     </div>
   ) 
