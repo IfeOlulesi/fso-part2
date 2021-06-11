@@ -1,42 +1,40 @@
-import React from 'react';
+import React from "react";
+import Weather from "./Weather"
 
 const Output = ({ filterOutput, sectionTitle, single }) => {
+  const singleCountry = filterOutput[0]
+
+  const formatter = new Intl.NumberFormat('en-US', {})
+
   return (
     <React.Fragment>
-      {single 
-        ? 
-          <React.Fragment>
-            <h2>{filterOutput[0].name}</h2> 
-            <p>
-              Population: {filterOutput[0].population}<br />
-              Languages:
-              <ol>
-                 {
-                  filterOutput[0]
-                  .languages
-                  .map((language) => (
-                    <li key={language.name}>{language.name}</li>
-                    ))
-                  }
-              </ol>
-            </p>
-            <img style={{width: '100px'}} src={filterOutput[0].flag}/>
-          </React.Fragment>
-
-        : 
-          <React.Fragment>
-            <h2>{sectionTitle}</h2>
+      {single ? ( // if its a single country
+        <React.Fragment>
+          <h2>{singleCountry.name}</h2>
+          <p>
+            Population: {formatter.format(singleCountry.population)}<br />
+            Languages:
             <ol>
-              {filterOutput.map((country) => (
-                <li key={country.name}>{country.name}</li>
+              {singleCountry.languages.map((language) => (
+                <li key={language.name}>{language.name}</li>
               ))}
             </ol>
-          </React.Fragment>
-        
-      }
-      
+          </p>
+          <img style={{ width: "100px" }} src={filterOutput[0].flag} />
+          <Weather country={singleCountry}/>
+        </React.Fragment>
+      ) : ( //if we're handling multiple countries
+        <React.Fragment>
+          <h2>{sectionTitle}</h2>
+          <ol>
+            {filterOutput.map((country) => (
+              <li key={country.name}>{country.name}</li>
+            ))}
+          </ol>
+        </React.Fragment>
+      )}
     </React.Fragment>
-  )
-}
+  );
+};
 
 export default Output;
