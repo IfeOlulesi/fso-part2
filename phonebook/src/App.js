@@ -37,6 +37,7 @@ const AddContacts = ({
 };
 
 const ShowContacts = ({ contacts, filterQuery, deleteContact }) => {
+  // huge bug here: filter accepts name, number and id...fix this 
   return (
     <>
       <h2>Contacts</h2>
@@ -79,24 +80,53 @@ const App = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    const newContact = {
-      name: newName,
-      number: newNumber,
-      id: contacts[contacts.length - 1].id + 1,
-    };
+    const contactNameExists = contacts.findIndex((el) => el.name === newName);
+    const contactNumberExists = contacts.findIndex(
+      (el) => el.number === newNumber
+    );
 
     if (newName === "" || newNumber === "") {
       alert("Name and Number fields can't be empty");
-    } else if (
-      contacts.findIndex(
-        (el) => el.name === newName || el.number === newNumber
-      ) !== -1
-    ) {
-      alert(`${newName} has already been added`);
+    } 
+    
+    else if (contactNameExists !== -1) {
+      if (
+        window.confirm(
+          `${contacts[contactNameExists].name} is already added to the phonebook. Do you want to replace the old number with the new one?`
+        )
+      ) 
+      {
+        contactService
+          .update(contacts[contactNameExists].id, {
+            ...contacts[contactNameExists],
+            number: newNumber,
+          })
+          .then((returnedContact) => {
+            let temp = [...contacts];
+            temp[contactNameExists] = {
+              ...temp[contactNameExists],
+              number: returnedContact.number,
+            }
+            setContacts(temp)
+          });
+      }
+    } 
+    
+    else if (contactNumberExists !== -1) {
+      alert(
+        `A contact with that number already exists - ${contacts[contactNumberExists].name}`
+      );
       setNewName("");
       setNewNumber("");
-    } else {
+    } 
+    
+    else {
+      const newContact = {
+        name: newName,
+        number: newNumber,
+        id: contacts[contacts.length - 1].id + 1,
+      };
+
       contactService
         .create(newContact)
         .then((returnedContact) =>
@@ -123,7 +153,11 @@ const App = () => {
   const deleteContact = (id) => {
     const oldContactIndex = contacts.findIndex((el) => el.id === id);
 
-    if (window.confirm(`Do you want to delete ${contacts[oldContactIndex].name} - ${contacts[oldContactIndex].number}`)) {
+    if (
+      window.confirm(
+        `Do you want to delete ${contacts[oldContactIndex].name} - ${contacts[oldContactIndex].number}`
+      )
+    ) {
       contactService.deleteContact(id).then(() => {
         const newContacts = contacts.filter((el) => el.id !== id);
         setContacts(newContacts);

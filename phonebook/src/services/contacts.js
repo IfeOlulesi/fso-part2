@@ -16,9 +16,14 @@ const deleteContact = id => {
   return request.then(res => res.status)
 }
 
-  // const request = axios.delete(`${baseUrl}/${id}`)
-  // const res = await request;
-  // // return 
-  // console.log(res);
+const update = (id, newContact) => {
+  const request = axios.put(`${baseUrl}/${id}`, newContact)
+  return request.then(res => res.data)
+}
 
-export default { getAll, create, deleteContact }
+// const request = axios.delete(`${baseUrl}/${id}`)
+// const res = await request;
+// // return 
+// console.log(res);
+
+export default { getAll, create, deleteContact, update }
