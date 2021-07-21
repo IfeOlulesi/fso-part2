@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios'
+import contactService from "./services/contacts";
 
 const Filter = ({ filterQuery, filterHandler }) => {
   return (
@@ -36,7 +36,7 @@ const AddContacts = ({
   );
 };
 
-const ShowContacts = ({ contacts, filterQuery }) => {
+const ShowContacts = ({ contacts, filterQuery, deleteContact }) => {
   return (
     <>
       <h2>Contacts</h2>
@@ -50,7 +50,16 @@ const ShowContacts = ({ contacts, filterQuery }) => {
           )
           .map((el) => (
             <li key={el.name}>
-              {el.name} {el.number}
+              <form id={el.id}>
+                {el.name} {el.number}
+              </form>
+              <button
+                form={el.id}
+                type="button"
+                onClick={() => deleteContact(el.id)}
+              >
+                delete
+              </button>
             </li>
           ))}
       </ol>
@@ -59,33 +68,41 @@ const ShowContacts = ({ contacts, filterQuery }) => {
 };
 
 const App = () => {
-  
-  const baseUrl = `http://localhost:3010/persons`;
   const [contacts, setContacts] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
 
   useEffect(() => {
-    const request = axios.get(baseUrl);
-    request.then(response => setContacts(response.data))
-  }, [])
+    contactService.getAll().then((allContacts) => setContacts(allContacts));
+  }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    const newContact = {
+      name: newName,
+      number: newNumber,
+      id: contacts[contacts.length - 1].id + 1,
+    };
 
     if (newName === "" || newNumber === "") {
       alert("Name and Number fields can't be empty");
     } else if (
       contacts.findIndex(
         (el) => el.name === newName || el.number === newNumber
-      ) === -1
+      ) !== -1
     ) {
-      setContacts(contacts.concat({ name: newName, number: newNumber }));
+      alert(`${newName} has already been added`);
       setNewName("");
       setNewNumber("");
     } else {
-      alert(`${newName} has already been added`);
+      contactService
+        .create(newContact)
+        .then((returnedContact) =>
+          setContacts(contacts.concat(returnedContact))
+        );
+
       setNewName("");
       setNewNumber("");
     }
@@ -103,6 +120,17 @@ const App = () => {
     setFilterQuery(event.target.value);
   };
 
+  const deleteContact = (id) => {
+    const oldContactIndex = contacts.findIndex((el) => el.id === id);
+
+    if (window.confirm(`Do you want to delete ${contacts[oldContactIndex].name} - ${contacts[oldContactIndex].number}`)) {
+      contactService.deleteContact(id).then(() => {
+        const newContacts = contacts.filter((el) => el.id !== id);
+        setContacts(newContacts);
+      });
+    }
+  };
+
   return (
     <div>
       <h1>Phonebook</h1>
@@ -116,7 +144,11 @@ const App = () => {
         handleSubmit={handleSubmit}
       />
 
-      <ShowContacts contacts={contacts} filterQuery={filterQuery} />
+      <ShowContacts
+        contacts={contacts}
+        filterQuery={filterQuery}
+        deleteContact={deleteContact}
+      />
     </div>
   );
 };
