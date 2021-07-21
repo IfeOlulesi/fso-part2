@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios'
 
 const Filter = ({ filterQuery, filterHandler }) => {
   return (
@@ -58,15 +59,17 @@ const ShowContacts = ({ contacts, filterQuery }) => {
 };
 
 const App = () => {
-  const [contacts, setContacts] = useState([
-    { name: "Arto Hellas", number: "09022317471" },
-    { name: "Ada Lovelace", number: "39-44-5323523" },
-    { name: "Dan Abramov", number: "12-43-234345" },
-    { name: "Mary Poppendieck", number: "39-23-6423122" },
-  ]);
+  
+  const baseUrl = `http://localhost:3010/persons`;
+  const [contacts, setContacts] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
+
+  useEffect(() => {
+    const request = axios.get(baseUrl);
+    request.then(response => setContacts(response.data))
+  }, [])
 
   const handleSubmit = (event) => {
     event.preventDefault();
