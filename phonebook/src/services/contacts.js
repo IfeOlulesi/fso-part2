@@ -8,7 +8,7 @@ const getAll = () => {
 
 const create = newContact => {
   const request = axios.post(baseUrl, newContact);
-  return request.then(response => response.data)
+  return request.then(response => response)
 }
 
 const deleteContact = id => {
