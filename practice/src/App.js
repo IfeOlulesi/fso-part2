@@ -11,7 +11,7 @@ const Footer = () => {
   return (
     <div style={footerStyle}>
       <br />
-      <em>Note app, Department of Computer Science, University of Helsinki 2021</em>
+      <em>Note app, Built with 💜 by <a href="https://github.com/IfeOlulesi">Ife Olulesi</a> 2021</em>
     </div>
   )
 }
@@ -27,7 +27,7 @@ const Notification = ({ message }) => {
 
 const App = () => {
   const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState("a new note...");
+  const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -103,7 +103,7 @@ const App = () => {
       </ul>
 
       <form onSubmit={addNote}>
-        <input value={newNote} onChange={handleNoteChange} />
+        <input value={newNote} onChange={handleNoteChange} placeholder="type here..." />
         <button type="submit">Save Note</button>
         <button onClick={toggleShowAll}>
           Show {showAll ? "important" : "all"}
